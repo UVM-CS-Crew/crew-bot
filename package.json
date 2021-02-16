@@ -1,7 +1,7 @@
 {
   "name": "crew-bot",
-  "version": "1.0.0",
-  "description": "todo",
+  "version": "0.0.0",
+  "description": "project bot for UVM CS Crew Discord server",
   "main": "bot.js",
   "scripts": {
     "start": "node bot.js",
@@ -17,14 +17,15 @@
     "discord.js": "^12.3.1",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
-    "firebase": "^7.15.5",
-    "firebase-admin": "^8.13.0",
+    "firebase": "^8.2.0",
+    "firebase-admin": "^9.4.1",
     "md5": "^2.2.1",
     "moment": "^2.27.0",
-    "node-fetch": "^2.6.0"
+    "node-fetch": "^2.6.1",
+    "node-forge": "^0.10.0"
   },
   "engines": {
-    "node": "10.x",
+    "node": "14.x",
     "npm": "*"
   }
 }
