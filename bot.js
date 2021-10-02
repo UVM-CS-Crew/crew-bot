@@ -1,17 +1,22 @@
 const fs = require('fs');
 const Discord = require('discord.js');
 
+const { buildSlashCommands } = require('./lib/functions');
+
 const client = new Discord.Client();
 client.commands = new Discord.Collection();
+client.slashCommands = new Discord.Collection();
 
-const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'));
+buildSlashCommands(client);
 
-for (const file of commandFiles) {
-	const command = require(`./commands/${file}`);
-	client.commands.set(command.name, command);
-}
+// const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'));
 
-const cooldowns = new Discord.Collection();
+// for (const file of commandFiles) {
+// 	const command = require(`./commands/${file}`);
+// 	client.commands.set(command.name, command);
+// }
+
+// const cooldowns = new Discord.Collection();
 
 // uncomment this if firebase used
 // let db = require('./config.js');
