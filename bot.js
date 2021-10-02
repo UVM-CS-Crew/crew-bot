@@ -1,98 +1,22 @@
-const fs = require('fs');
-const Discord = require('discord.js');
+const { buildSlashCommands, registerEvents } = require('./lib/functions/setup');
 
-const { buildSlashCommands } = require('./lib/functions');
-
-const client = new Discord.Client();
-client.commands = new Discord.Collection();
-client.slashCommands = new Discord.Collection();
-
-buildSlashCommands(client);
-
-// const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'));
-
-// for (const file of commandFiles) {
-// 	const command = require(`./commands/${file}`);
-// 	client.commands.set(command.name, command);
-// }
-
-// const cooldowns = new Discord.Collection();
-
-// uncomment this if firebase used
-// let db = require('./config.js');
-
-// if you want a configurable prefix, I suggest using firebase to store the value, 
-// read from it on bot boot and update it through a prefix command (or a nested settings command),
-// having the hardcoded prefix as a fallback.
-/**
-let prefixDocRef = db.collection("collection id here").doc("doc id here");
-prefixDocRef.onSnapshot(function(docSnapshot) {
-	prefixDocRef.get().then(function(doc) {
-		prefix = doc.data()['value'];
-	});
-})
-*/
-const prefix = '!';
-
-client.once('ready', () => {
-		console.log('Ready!');
+// create our bot client
+const client = new Client({
+	// disableMentions: 'everyone',
+	// intents: [Intents.FLAGS.GUILDS]
+	intents: ['GUILDS', 'GUILD_MESSAGES', 'DIRECT_MESSAGES', 'GUILD_VOICE_STATES', 'GUILD_PRESENCES', 'GUILD_MEMBERS']
 });
 
-client.on('message', message => {
-	if (!message.content.startsWith(prefix) || message.author.bot) return; 
+// todo: CUSTOM_STATUS use to add custom status message?
 
-    // optional more strict args filterings
-    // const args = message.content.slice(prefix.length).split(/ +/);
+const init = async () => {
+	// future: set the bot settings from supabase
+	client.settings = {};
 
-	const args = message.content.slice(prefix.length).match(/(".*?"|[^"\s]+)+(?=\s*|\s*$)/g)
-	const commandName = args.shift().toLowerCase();
+	buildSlashCommands(client);
+	registerEvents(client);
 
-	if (!client.commands.has(commandName)) return;
+	client.login(process.env.DISCORD_KEY);
+};
 
-	const command = client.commands.get(commandName);
-
-
-	// if command missing required arguments 
-	if (command.args && !args.length) {
-		let reply = `You didn't provide any arguments, ${message.author}!`;
-
-		if (command.usage) {
-			reply += `\nThe proper usage would be: \`${prefix}${command.name} ${command.usage}\``;
-		}
-
-		return message.channel.send(reply);
-	}
-
-	// message cooldown
-	if (!cooldowns.has(command.name)) {
-		cooldowns.set(command.name, new Discord.Collection());
-	}
-	
-	const now = Date.now();
-	const timestamps = cooldowns.get(command.name);
-	const cooldownAmount = (command.cooldown || 3) * 1000;
-	
-	if (timestamps.has(message.author.id)) {
-		const expirationTime = timestamps.get(message.author.id) + cooldownAmount;
-	
-		if (now < expirationTime) {
-			const timeLeft = (expirationTime - now) / 1000;
-			return message.reply(`Please wait ${timeLeft.toFixed(1)} more second(s) before reusing the \`${command.name}\` command.`);
-		}
-	}
-
-	timestamps.set(message.author.id, now);
-	setTimeout(() => timestamps.delete(message.author.id), cooldownAmount);
-
-
-	try {
-		command.execute(message, args, client);
-	} catch (error) {
-		console.error(error);
-		message.reply('There was an error trying to execute that command!');
-	}
-
-});
-
-// also use an env variable here
-client.login('login key here');
+init();
