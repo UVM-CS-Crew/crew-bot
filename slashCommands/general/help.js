@@ -1,50 +1,28 @@
-// i forget if this line is needed since db is included in bot.js
-// uncomment here or there depending on if firebase used and correct location found
-// let db = require('../config.js');
-
-// if a custom prefix is implemented, pull the prefix into this command to display more accurate help.
-const prefix = '!';
+const { SlashCommandBuilder } = require('@discordjs/builders');
 
 module.exports = {
-	name: 'help',
-	description: 'List all of my commands or info about a specific command.',
-	usage: '[command name]',
 	cooldown: 5,
-	execute(message, args) {
+	ephemeral: true,
+	data: new SlashCommandBuilder()
+		.setName('help')
+		.setDescription('Get helpful instructions for the bot'),
+	async execute(interaction, client) {
 		const data = [];
-		const { commands } = message.client;
 
-		if (!args.length) {
-			data.push(`The prefix for my commands is \`${prefix}\`. Here\'s a list of all my commands:`);
-			data.push(commands.map(command => command.name).join(', '));
-			data.push(`\nYou can send \`${prefix}help [command name]\` to get info on a specific command!`);
+		//todo: decide on a way to have users ask for specific help, or
+		// just list the whole thing out
 
-			return message.author.send(data, { split: true })
-				.then(() => {
-					if (message.channel.type === 'dm') return;
-					message.reply('I\'ve sent you a DM with all my commands!');
-				})
-				.catch(error => {
-					console.error(`Could not send help DM to ${message.author.tag}.\n`, error);
-					message.reply('it seems like I can\'t DM you!');
-				});
-		}
+		// depends on how many commands we will have in total
+		// iirc, either select list, or choice list, are either 10 or 25
+		// so one or the other or both could be a good way to show the command list
+		// and let someone pick
 
-		const name = args[0].toLowerCase();
-		const command = commands.get(name) || commands.find(c => c.aliases && c.aliases.includes(name));
+		// alternatively, we scrap this command - and the description when a user
+		// starts typing /${commandName} is enough.
 
-		if (!command) {
-			return message.reply('that\'s not a valid command!');
-		}
+		data.push('Here\'s a list of all my commands:');
+		data.push(client.slashCommands.map(command => command.name).join(', '));
 
-		data.push(`**Name:** ${command.name}`);
-
-        // aliases are not currently implemented but could be worth it, see documentation for steps
-		if (command.aliases) data.push(`**Aliases:** ${command.aliases.join(', ')}`);
-		if (command.description) data.push(`**Description:** ${command.description}`);
-		if (command.usage) data.push(`**Usage:** ${prefix}${command.name} ${command.usage}`);
-		if (command.cooldown) data.push(`**Cooldown:** ${command.cooldown} second(s)`);
-
-		message.channel.send(data, { split: true });
+		interaction.reply({ content: data.toString(), ephemeral: this.ephemeral });
 	},
 };
