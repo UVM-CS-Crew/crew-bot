@@ -2,7 +2,7 @@ const { SlashCommandBuilder } = require('@discordjs/builders');
 
 module.exports = {
 	cooldown: 2,
-	ephemeral: false, // this command doesnt use ephemeral but could
+	ephemeral: true,
 	data: new SlashCommandBuilder()
 		.setName('avatar')
 		.setDescription('View a user\'s avatar')
